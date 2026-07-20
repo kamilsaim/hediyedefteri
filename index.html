@@ -507,7 +507,8 @@ function mergeRecordRow(row){
 }
 
 function signInWithGoogle(){
-  sb.auth.signInWithOAuth({provider:'google', options:{redirectTo: window.location.href}});
+  var cleanUrl = window.location.origin + window.location.pathname + window.location.search;
+  sb.auth.signInWithOAuth({provider:'google', options:{redirectTo: cleanUrl}});
 }
 function signOut(){
   sb.auth.signOut().then(function(){ window.location.reload(); });
@@ -565,6 +566,9 @@ function initAuth(){
 
 function handleSession(session){
   var loginEl = document.getElementById('loginScreen');
+  if(window.location.hash.indexOf('access_token') !== -1 || window.location.hash.indexOf('error') !== -1){
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
   if(session && session.user){
     currentUser = session.user;
     loginEl.style.display = 'none';
