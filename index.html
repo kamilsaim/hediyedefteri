@@ -505,6 +505,7 @@ function migrateLocalDataIfNeeded(){
     if(!db.persons.length && !db.records.length) return;
     return new Promise(function(resolve){
       showConfirm('Bu cihazdaki mevcut hediye defteri verilerini hesabınıza aktarmak ister misiniz?', function(){
+        ensureLocalIdsAreUuids();
         var personRows = db.persons.map(personToRow);
         var recordRows = db.records.map(recordToRow);
         sb.from('hediye_persons').upsert(personRows).then(function(){
@@ -567,7 +568,30 @@ function load(){
   }catch(e){ return {persons:[],records:[],meta:{}}; }
 }
 function save(){ localStorage.setItem(LS_KEY, JSON.stringify(db)); checkBackupNag(); }
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function uid(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+    var r = Math.random()*16|0, v = c==='x' ? r : (r&0x3|0x8);
+    return v.toString(16);
+  });
+}
+var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function ensureLocalIdsAreUuids(){
+  var changed = false;
+  db.persons.forEach(function(p){
+    if(UUID_RE.test(p.id)) return;
+    var oldId = p.id, newId = uid();
+    p.id = newId;
+    db.records.forEach(function(r){ if(r.personId === oldId) r.personId = newId; });
+    changed = true;
+  });
+  db.records.forEach(function(r){
+    if(UUID_RE.test(r.id)) return;
+    r.id = uid();
+    changed = true;
+  });
+  if(changed){ save(); saveQueue([]); }
+}
 function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function fmtDate(d){ return d ? d.split('-').reverse().join('.') : ''; }
 function fmtNum(n){ return (+(+n).toFixed(2)).toLocaleString('tr-TR'); }
