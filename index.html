@@ -304,7 +304,7 @@ nav.bottom button.active{color:var(--gold)}
     <p id="confirmMsg"></p>
     <div class="frm actions">
       <button class="sec" onclick="confirmNo()">Vazgeç</button>
-      <button class="danger" onclick="confirmYes()">Sil</button>
+      <button class="danger" id="confirmYesBtn" onclick="confirmYes()">Sil</button>
     </div>
   </div>
 </div>
@@ -510,7 +510,7 @@ function migrateLocalDataIfNeeded(){
         sb.from('hediye_persons').upsert(personRows).then(function(){
           return sb.from('hediye_records').upsert(recordRows);
         }).then(resolve, resolve);
-      }, resolve);
+      }, resolve, 'Aktar');
     });
   });
 }
@@ -888,8 +888,9 @@ function deleteRecord(id){
 }
 var _confirmCb = null;
 var _confirmCancelCb = null;
-function showConfirm(msg, cb, onCancel){
+function showConfirm(msg, cb, onCancel, yesLabel){
   document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmYesBtn').textContent = yesLabel || 'Sil';
   _confirmCb = cb;
   _confirmCancelCb = onCancel || null;
   document.getElementById('confirmOverlay').classList.add('open');
