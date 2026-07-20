@@ -184,6 +184,11 @@ nav.bottom button.active{color:var(--gold)}
   </button>
   <span id="syncDot" title="Senkron durumu" onclick="showAccountInfo()" style="width:9px;height:9px;border-radius:50%;background:#888;margin-right:8px;flex:none;cursor:pointer"></span>
 </div>
+<div id="installBanner" class="banner" style="display:none">
+  📲 Bu uygulamayı ana ekranınıza ekleyebilirsiniz.
+  <button class="gold small" onclick="installPwa()">Yükle</button>
+  <button class="sec small" onclick="document.getElementById('installBanner').style.display='none'">Sonra</button>
+</div>
 <div id="loginScreen" class="overlay open" style="align-items:center;justify-content:center">
   <div class="sheet" style="text-align:center;padding:32px 24px">
     <img src="logo.png" alt="Hediye Defteri logosu" style="width:96px;height:96px;object-fit:contain;margin-bottom:12px">
@@ -1203,6 +1208,27 @@ function importJSON(inp){
 renderPersons();
 checkBackupNag();
 initAuth();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(err){ console.error('SW register failed:', err); });
+  });
+}
+var deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  document.getElementById('installBanner').style.display = '';
+});
+function installPwa(){
+  document.getElementById('installBanner').style.display = 'none';
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt = null;
+}
+window.addEventListener('appinstalled', function(){
+  document.getElementById('installBanner').style.display = 'none';
+});
 </script>
 </body>
 </html>
