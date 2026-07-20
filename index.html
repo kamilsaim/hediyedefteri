@@ -186,6 +186,7 @@ nav.bottom button.active{color:var(--gold)}
 </div>
 <div id="loginScreen" class="overlay open" style="align-items:center;justify-content:center">
   <div class="sheet" style="text-align:center;padding:32px 24px">
+    <img src="logo.png" alt="Hediye Defteri logosu" style="width:96px;height:96px;object-fit:contain;margin-bottom:12px">
     <h2 style="margin-bottom:8px">Hediye Defteri</h2>
     <p style="opacity:.7;margin-bottom:20px">Verilerinize erişmek için Google ile giriş yapın.</p>
     <button class="small" onclick="signInWithGoogle()" style="width:100%">🔑 Google ile Giriş Yap</button>
@@ -290,6 +291,7 @@ nav.bottom button.active{color:var(--gold)}
       <button onclick="closeModals();exportJSON()">💾 Yedek al (JSON)</button>
       <button onclick="closeModals();document.getElementById('jsonFile').click()">📥 Yedek yükle</button>
       <button onclick="closeModals();signOut()">🚪 Çıkış yap</button>
+      <button class="danger" onclick="closeModals();deleteAllData()">🗑️ Tüm verileri sil</button>
     </div>
     <input type="file" id="xlsFile" accept=".xlsx,.xls,.csv" hidden onchange="importExcel(this)">
     <input type="file" id="jsonFile" accept=".json" hidden onchange="importJSON(this)">
@@ -468,7 +470,17 @@ function pullFromSupabase(){
     (recordsRes.data||[]).forEach(function(row){ mergeRecordRow(row); });
     save();
     localStorage.setItem(LAST_SYNC_KEY, nowIso);
+    refreshActiveView();
   });
+}
+
+function refreshActiveView(){
+  if(activeTab==='persons') renderPersons();
+  else if(activeTab==='records') renderRecords();
+  else if(activeTab==='owed') renderOwed();
+  else if(activeTab==='summary') renderSummary();
+  else if(activeTab==='detail') openDetail(currentPersonId);
+  updateOwedBadge();
 }
 
 function mergePersonRow(row){
@@ -499,6 +511,23 @@ function signInWithGoogle(){
 }
 function signOut(){
   sb.auth.signOut().then(function(){ window.location.reload(); });
+}
+
+function deleteAllData(){
+  showConfirm('TÜM kişileriniz ve kayıtlarınız kalıcı olarak silinecek. Bu işlem geri alınamaz. Emin misiniz?', function(){
+    db.persons = [];
+    db.records = [];
+    save();
+    saveQueue([]);
+    refreshActiveView();
+    if(currentUser){
+      var now = new Date().toISOString();
+      Promise.all([
+        sb.from('hediye_persons').update({deleted_at:now, updated_at:now}).eq('user_id', currentUser.id).is('deleted_at', null),
+        sb.from('hediye_records').update({deleted_at:now, updated_at:now}).eq('user_id', currentUser.id).is('deleted_at', null)
+      ]);
+    }
+  }, null, 'Tümünü Sil');
 }
 
 function migrateLocalDataIfNeeded(){
