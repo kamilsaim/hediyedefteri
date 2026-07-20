@@ -182,7 +182,7 @@ nav.bottom button.active{color:var(--gold)}
   <button class="menu-btn" onclick="openMenu()" aria-label="Menü">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6" fill="#fff"/><circle cx="12" cy="12" r="1.6" fill="#fff"/><circle cx="12" cy="19" r="1.6" fill="#fff"/></svg>
   </button>
-  <span id="syncDot" title="Senkron durumu" style="width:9px;height:9px;border-radius:50%;background:#888;margin-right:8px;flex:none"></span>
+  <span id="syncDot" title="Senkron durumu" onclick="showAccountInfo()" style="width:9px;height:9px;border-radius:50%;background:#888;margin-right:8px;flex:none;cursor:pointer"></span>
 </div>
 <div id="loginScreen" class="overlay open" style="align-items:center;justify-content:center">
   <div class="sheet" style="text-align:center;padding:32px 24px">
@@ -198,9 +198,7 @@ nav.bottom button.active{color:var(--gold)}
   <div class="searchwrap"><input id="personSearch" placeholder="Kişi ara..." oninput="renderPersons()"></div>
   <main>
     <div id="backupBanner" class="banner" style="display:none">
-      ⚠️ Son yedekten sonra çok kayıt eklendi.
-      <button class="gold small" onclick="exportJSON()">Yedek al</button>
-      <button class="sec small" onclick="dismissBackup()">Sonra</button>
+      ✅ Otomatik yedek indirildi.
     </div>
     <div id="personList"></div>
   </main>
@@ -390,6 +388,14 @@ function setSyncDot(state){
   if(!el) return;
   el.style.background = state==='online' ? '#2ecc71' : state==='syncing' ? '#f39c12' : '#888';
 }
+function updateAccountIndicator(){
+  var el = document.getElementById('syncDot');
+  if(!el) return;
+  el.title = currentUser ? ('Senkron durumu — oturum: '+currentUser.email) : 'Senkron durumu';
+}
+function showAccountInfo(){
+  alert(currentUser ? ('Oturum açık: '+currentUser.email) : 'Oturum açılmadı.');
+}
 
 function loadQueue(){
   try{ return JSON.parse(localStorage.getItem(SYNC_QUEUE_KEY)) || []; }catch(e){ return []; }
@@ -533,9 +539,11 @@ function handleSession(session){
   if(session && session.user){
     currentUser = session.user;
     loginEl.style.display = 'none';
+    updateAccountIndicator();
     migrateLocalDataIfNeeded().then(pullFromSupabase).then(processSyncQueue);
   } else {
     currentUser = null;
+    updateAccountIndicator();
     loginEl.style.display = '';
   }
 }
@@ -597,15 +605,14 @@ function fmtDate(d){ return d ? d.split('-').reverse().join('.') : ''; }
 function fmtNum(n){ return (+(+n).toFixed(2)).toLocaleString('tr-TR'); }
 function fmtTL(n){ return fmtNum(n)+' ₺'; }
 
-/* ---- YEDEK UYARISI ---- */
+/* ---- OTOMATIK YEDEK ---- */
 function checkBackupNag(){
   var last = db.meta.lastBackupCount||0;
-  document.getElementById('backupBanner').style.display = (db.records.length - last >= 20)?'':'none';
-}
-function dismissBackup(){
-  db.meta.lastBackupCount = db.records.length;
-  localStorage.setItem(LS_KEY, JSON.stringify(db));
-  checkBackupNag();
+  if(db.records.length - last < 20) return;
+  exportJSON();
+  var el = document.getElementById('backupBanner');
+  el.style.display = '';
+  setTimeout(function(){ el.style.display = 'none'; }, 4000);
 }
 
 /* ---- SEKMELER & FAB ---- */
