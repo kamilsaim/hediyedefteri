@@ -695,6 +695,17 @@ function uid(){
   });
 }
 var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function nameSimilarity(a, b){
+  function words(s){
+    return (s||'').trim().toLocaleLowerCase('tr').split(/\s+/).filter(Boolean);
+  }
+  var wa = words(a), wb = words(b);
+  if(!wa.length || !wb.length) return 0;
+  var setB = {};
+  wb.forEach(function(w){ setB[w] = true; });
+  var common = wa.filter(function(w){ return setB[w]; }).length;
+  return common / Math.max(wa.length, wb.length);
+}
 function ensureLocalIdsAreUuids(){
   var changed = false;
   db.persons.forEach(function(p){
@@ -836,17 +847,39 @@ function editPerson(id){
   document.getElementById('pNote').value = p.note||'';
   document.getElementById('personOverlay').classList.add('open');
 }
+var _personSaving = false;
 function savePerson(){
+  if(_personSaving) return;
   var name = document.getElementById('pName').value.trim();
   if(!name){ alert('Ad Soyad gerekli.'); return; }
+  _personSaving = true;
   var data = { name:name, rel:document.getElementById('pRel').value.trim(),
     phone:document.getElementById('pPhone').value.trim(), note:document.getElementById('pNote').value.trim() };
-  var savedPerson;
-  if(editingPersonId){
-    savedPerson = Object.assign(db.persons.find(function(x){return x.id===editingPersonId;}), data);
-  } else { data.id = uid(); db.persons.push(data); savedPerson = data; }
-  save(); queueSync('hediye_persons','upsert', personToRow(savedPerson)); closeModals();
-  if(activeTab==='detail') openDetail(currentPersonId); else renderPersons();
+
+  function doSavePerson(){
+    var savedPerson;
+    if(editingPersonId){
+      savedPerson = Object.assign(db.persons.find(function(x){return x.id===editingPersonId;}), data);
+    } else { data.id = uid(); db.persons.push(data); savedPerson = data; }
+    save(); queueSync('hediye_persons','upsert', personToRow(savedPerson)); closeModals();
+    if(activeTab==='detail') openDetail(currentPersonId); else renderPersons();
+    _personSaving = false;
+  }
+
+  if(!editingPersonId){
+    var matches = db.persons.filter(function(p){ return nameSimilarity(name, p.name) >= 0.5; });
+    if(matches.length){
+      showConfirm(
+        '"'+name+'" benzer/aynı isimde '+matches.length+' kişi var: '+
+        matches.map(function(p){ return p.name; }).join(', ')+'. Yine de eklensin mi?',
+        doSavePerson,
+        function(){ _personSaving = false; },
+        'Yine de ekle'
+      );
+      return;
+    }
+  }
+  doSavePerson();
 }
 function deletePerson(id){
   var p = db.persons.find(function(x){return x.id===id;}); if(!p) return;
@@ -1048,7 +1081,9 @@ function editRecord(id){
   document.getElementById('giftLines').innerHTML = '';
   r.items.forEach(addGiftLine);
 }
+var _recordSaving = false;
 function saveRecord(){
+  if(_recordSaving) return;
   var items = [];
   document.querySelectorAll('#giftLines .gift-line').forEach(function(l){
     var qty = parseFloat(l.querySelector('.glQty').value);
@@ -1057,6 +1092,7 @@ function saveRecord(){
       note:l.querySelector('.glNote').value.trim(), tl:(tl>0?+tl.toFixed(2):null) });
   });
   if(!items.length){ alert('En az bir hediye satırı girin (miktar 0\u0027dan büyük).'); return; }
+  _recordSaving = true;
   var data = {
     personId: document.getElementById('rPerson').value,
     dir: dir, occ: document.getElementById('rOcc').value,
@@ -1071,6 +1107,7 @@ function saveRecord(){
   save(); queueSync('hediye_records','upsert', recordToRow(savedRecord)); closeModals();
   if(activeTab==='detail') openDetail(currentPersonId);
   else { renderRecords(); renderPersons(); }
+  _recordSaving = false;
 }
 function deleteRecord(id){
   showConfirm('Kayıt silinsin mi?', function(){
@@ -1259,23 +1296,39 @@ function importExcel(inp){
         }
         return '';
       }
-      rows.forEach(function(r){
+      function addImportedRow(r){
         var norm = {};
         Object.keys(r).forEach(function(k){ norm[normKey(k)] = r[k]; });
-        var name = String(findVal(norm,['adsoyad','adisoyadı','isimsoyisim','isim','ad'])||'').trim();
-        if(!name){ skipped++; return; }
-        var exists = db.persons.some(function(p){ return p.name.toLocaleLowerCase('tr')===name.toLocaleLowerCase('tr'); });
-        if(exists){ skipped++; return; }
-        var importedPerson = {id:uid(), name:name,
+        var importedPerson = {id:uid(), name:r._name,
           rel:String(findVal(norm,['yakınlık','yakinlik'])||'').trim(),
           phone:String(findVal(norm,['telefon','tel'])||'').trim(),
           note:String(findVal(norm,['not','açıklama','aciklama'])||'').trim()};
         db.persons.push(importedPerson);
         if(currentUser) queueSync('hediye_persons','upsert', personToRow(importedPerson));
         added++;
-      });
-      save(); showTab('persons');
-      alert(added+' kişi eklendi'+(skipped?', '+skipped+' satır atlandı (boş veya mevcut)':'')+'.\nBeklenen kolonlar: Ad Soyad, Yakınlık, Telefon, Not');
+      }
+      function processImportRow(index){
+        if(index >= rows.length){
+          save(); showTab('persons');
+          alert(added+' kişi eklendi'+(skipped?', '+skipped+' satır atlandı (boş, mevcut veya benzer isim)':'')+'.\nBeklenen kolonlar: Ad Soyad, Yakınlık, Telefon, Not');
+          return;
+        }
+        var r = rows[index];
+        var norm = {};
+        Object.keys(r).forEach(function(k){ norm[normKey(k)] = r[k]; });
+        var name = String(findVal(norm,['adsoyad','adisoyadı','isimsoyisim','isim','ad'])||'').trim();
+        if(!name){ skipped++; processImportRow(index+1); return; }
+        r._name = name;
+        var matches = db.persons.filter(function(p){ return nameSimilarity(name, p.name) >= 0.5; });
+        if(!matches.length){ addImportedRow(r); processImportRow(index+1); return; }
+        showConfirm(
+          '"'+name+'" benzer/aynı isimde kişi var: '+matches.map(function(p){ return p.name; }).join(', ')+'. Yine de eklensin mi?',
+          function(){ addImportedRow(r); processImportRow(index+1); },
+          function(){ skipped++; processImportRow(index+1); },
+          'Yine de ekle'
+        );
+      }
+      processImportRow(0);
     }catch(err){ alert('Excel okunamadı: '+err.message); }
     inp.value='';
   };
