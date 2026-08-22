@@ -1,5 +1,5 @@
 // hediye-defteri.html degistiginde bu degeri artir (v2, v3, ...) - aksi halde eski surum cache'te kalir
-const CACHE_NAME = 'hediye-defteri-v10';
+const CACHE_NAME = 'hediye-defteri-v11';
 const APP_SHELL = ['./hediye-defteri.html', './logo.png'];
 // Supabase auth/REST istekleri (oturum/senkron) asla cache'ten servis edilmemeli - eski/
 // gecersiz bir yanit (ornegin token dogrulama) session_not_found gibi hatalara yol acar.

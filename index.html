@@ -36,8 +36,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 :root{
   --navy:#1B2440; --navy-dk:#121A30; --navy-tint:#E7EAF3;
   --gold:#C9A24A; --gold-deep:#A8811F; --gold-tint:#F6ECD4;
-  --bg:#F2EFE7; --card:#FFFFFF; --ink:#1B2440; --muted:#7C8296;
-  --red:#A5442A; --line:#E5E1D5; --r:16px;
+  --bg:#F2EFE7; --card:#FFFFFF; --ink:#1B2440; --muted:#676D85;
+  --red:#A5442A; --green:#3E7A3D; --green-tint:#E4F0E3; --line:#E5E1D5; --r:16px;
   --shadow:0 1px 3px rgba(27,36,64,.08), 0 4px 14px rgba(27,36,64,.06);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -58,7 +58,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
   padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px;
   border-bottom:2px solid var(--gold)}
 .appbar img{width:34px;height:34px;border-radius:9px;background:#fff;object-fit:contain}
-.appbar h1{font-size:17px;font-weight:650;letter-spacing:.2px;flex:1}
+.appbar h1{font-size:17px;font-weight:600;letter-spacing:.2px;flex:1}
 .appbar h1 span{color:var(--gold)}
 .appbar .menu-btn{background:transparent;padding:6px;border-radius:8px;line-height:0}
 .appbar .menu-btn svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round}
@@ -81,11 +81,11 @@ main{max-width:640px;margin:0 auto;padding:6px 16px calc(120px + env(safe-area-i
 .avatar{width:44px;height:44px;border-radius:50%;background:var(--gold-tint);color:var(--gold-deep);
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;flex-shrink:0}
 .row .info{flex:1;min-width:0}
-.row .name{font-weight:620}
+.row .name{font-weight:600}
 .row .sub{color:var(--muted);font-size:13px;margin-top:1px}
 .row .end{text-align:right;display:flex;flex-direction:column;gap:3px;align-items:flex-end}
 .chev{color:#C9C4B4;flex-shrink:0}
-.badge{font-size:12px;padding:3px 10px;border-radius:20px;white-space:nowrap;font-weight:550}
+.badge{font-size:12px;padding:3px 10px;border-radius:20px;white-space:nowrap;font-weight:500}
 .badge.in{background:var(--gold-tint);color:var(--gold-deep)}
 .badge.out{background:var(--navy-tint);color:var(--navy)}
 .badge.even{background:#ECE9DE;color:var(--muted)}
@@ -93,9 +93,9 @@ main{max-width:640px;margin:0 auto;padding:6px 16px calc(120px + env(safe-area-i
 /* ---- RECORD CARDS ---- */
 .rec{margin-bottom:10px}
 .rec .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.rec .who{font-weight:620;flex:1}
+.rec .who{font-weight:600;flex:1}
 .rec .date{color:var(--muted);font-size:12.5px}
-.rec .dirtag{font-size:12px;font-weight:650;padding:2px 9px;border-radius:6px}
+.rec .dirtag{font-size:12px;font-weight:600;padding:2px 9px;border-radius:6px}
 .dirtag.in{background:var(--gold-tint);color:var(--gold-deep)}
 .dirtag.out{background:var(--navy-tint);color:var(--navy)}
 .rec .gifts{margin-top:7px}
@@ -124,7 +124,7 @@ h3.sec-title{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter
 .back{background:transparent;color:var(--navy);padding:8px 4px;font-weight:600;display:flex;align-items:center;gap:4px}
 .detail-head{display:flex;align-items:center;gap:14px;margin-bottom:4px}
 .detail-head .avatar{width:56px;height:56px;font-size:22px}
-a.tel{color:var(--gold-deep);text-decoration:none;font-weight:550}
+a.tel{color:var(--gold-deep);text-decoration:none;font-weight:500}
 
 /* ---- FAB ---- */
 .fab{position:fixed;right:18px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:45;
@@ -154,7 +154,7 @@ nav.bottom button.active{color:var(--gold)}
 .confirm-sheet p{margin:18px 4px 6px;font-size:15px;color:var(--ink)}
 .sheet h2{font-size:17px;margin-bottom:14px;color:var(--navy)}
 .frm{display:grid;gap:12px}
-.frm label{font-size:12.5px;color:var(--muted);display:block;margin-bottom:4px;font-weight:550}
+.frm label{font-size:12.5px;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .frm .actions{display:flex;gap:8px;margin-top:8px}
 .frm .actions button{flex:1;padding:13px}
@@ -181,7 +181,7 @@ nav.bottom button.active{color:var(--gold)}
   display:flex;align-items:center;gap:12px}
 .acc-card .avatar{width:48px;height:48px;font-size:19px;background:var(--navy-tint);color:var(--navy)}
 .acc-card .info{flex:1;min-width:0}
-.acc-card .name{font-weight:650;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-card .name{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .acc-card .status{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-top:3px}
 .acc-card .status .dot{width:8px;height:8px;border-radius:50%;background:#888;flex-shrink:0}
 .set-group{margin-bottom:22px}
@@ -1236,7 +1236,7 @@ function renderGroupCards(map, sectionTitle){
   if(!keys.length) return '';
   return '<h3 class="sec-title">'+esc(sectionTitle)+'</h3>' + keys.sort().map(function(k){
     var v = map[k];
-    return '<div class="card"><div style="font-weight:620">'+esc(k)+
+    return '<div class="card"><div style="font-weight:600">'+esc(k)+
       ' <span class="badge even">'+v.cnt+' kayıt</span></div>'+
       groupLine(v.in, v.tlIn, 'Gelen')+groupLine(v.out, v.tlOut, 'Götürülen')+'</div>';
   }).join('');
