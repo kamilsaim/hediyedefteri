@@ -20,16 +20,18 @@
   sekmesinde tek bakışta görünür.
 - 📊 **Excel içe/dışa aktarım** — kişi listesini `.xlsx/.xls/.csv` ile içe aktar, tüm veriyi
   Excel'e aktar.
-- 💾 **Yedekleme** — tüm veriyi JSON olarak yedekle/geri yükle.
+- 💾 **Yedekleme** — tüm veriyi JSON olarak yedekle; yedek yüklerken mevcut verilerle
+  birleştirilir (eksik olanlar eklenir, var olanlara dokunulmaz).
 - 🔐 **Google ile giriş + bulut senkronu** — Supabase üzerinden Google OAuth ile giriş yapıp
   verilerini farklı cihazlar arasında offline-first senkronize et.
-- 📱 **PWA** — telefona/ana ekrana eklenebilir, service worker ile büyük ölçüde offline çalışır.
+- 📱 **PWA** — telefona/ana ekrana eklenebilir, service worker ile offline açılır; yeni sürüm
+  yayınlandığında uygulama içinde "Yeni sürüm hazır — Yenile" uyarısı çıkar.
 
 ## 🚀 Kullanım
 
 `index.html` dosyasını doğrudan bir tarayıcıda açman yeterli — kurulum ya da build adımı yok.
-Buluta senkron için Google hesabınla giriş yapman gerekir; giriş yapmadan da uygulama
-cihazında (localStorage) çalışmaya devam eder.
+Uygulamayı kullanmak için Google hesabınla giriş yapman gerekir; giriş yaptıktan sonra
+internet olmasa da çalışır, değişiklikler bağlantı gelince buluta gönderilir.
 
 ## 🛠️ Teknoloji
 
