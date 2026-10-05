@@ -1,5 +1,6 @@
-// hediye-defteri.html degistiginde bu degeri artir (v2, v3, ...) - aksi halde eski surum cache'te kalir
-const CACHE_NAME = 'hediye-defteri-v12';
+// hediye-defteri.html degistiginde bu degeri artir (v2, v3, ...) - aksi halde eski surum cache'te kalir.
+// Numara HTML'deki APP_VERSION ile ayni olmali (Ayarlar'da gorunen surum).
+const CACHE_NAME = 'hediye-defteri-v13';
 // Canlida (GitHub) sadece index.html var, yerelde hediye-defteri.html - ikisi de denenir, olmayan
 // dosya kurulumu bozmasin diye her biri ayri ayri ve hatasi yutularak cache'lenir.
 const APP_SHELL = ['./', './index.html', './hediye-defteri.html', './logo.png'];

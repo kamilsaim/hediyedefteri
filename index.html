@@ -186,6 +186,7 @@ nav.bottom button.active{color:var(--gold)}
 .acc-card .status{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-top:3px}
 .acc-card .status .dot{width:8px;height:8px;border-radius:50%;background:#888;flex-shrink:0}
 .set-group{margin-bottom:22px}
+.set-version{text-align:center;font-size:12.5px;color:var(--muted);margin:4px 0 12px}
 .set-group h3{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:0 4px 8px}
 .set-list{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
 .set-row{width:100%;background:transparent;color:var(--ink);border-radius:0;padding:13px 14px;
@@ -354,6 +355,8 @@ nav.bottom button.active{color:var(--gold)}
       </div>
     </div>
 
+    <p class="set-version" id="appVersion"></p>
+
     <input type="file" id="xlsFile" accept=".xlsx,.xls,.csv" hidden onchange="importExcel(this)">
     <input type="file" id="jsonFile" accept=".json" hidden onchange="importJSON(this)">
   </div>
@@ -437,6 +440,9 @@ nav.bottom button.active{color:var(--gold)}
 </div>
 
 <script>
+/* Uygulama sürümü — sw.js'deki CACHE_NAME ('hediye-defteri-vN') ile aynı numara olmalı, ikisi birlikte artırılır. */
+var APP_VERSION = 13;
+
 /* ---- SUPABASE ---- */
 var SUPABASE_URL = 'https://pdxnpnlwrtswwifevlil.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkeG5wbmx3cnRzd3dpZmV2bGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4MTk3MDIsImV4cCI6MjA5NDM5NTcwMn0.y5-rmssEre3GnaxenCMoo78XK69aIyR3P2XyGeMiU_g';
@@ -1577,6 +1583,7 @@ function mergeBackup(d){
     'data:application/manifest+json,'+encodeURIComponent(JSON.stringify(manifest));
 })();
 
+document.getElementById('appVersion').textContent = 'Hediye Defteri · Sürüm '+APP_VERSION;
 renderPersons();
 checkBackupNag();
 initAuth();
