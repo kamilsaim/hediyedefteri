@@ -1,6 +1,6 @@
 // hediye-defteri.html degistiginde bu degeri artir (v2, v3, ...) - aksi halde eski surum cache'te kalir.
 // Numara HTML'deki APP_VERSION ile ayni olmali (Ayarlar'da gorunen surum).
-const CACHE_NAME = 'hediye-defteri-v13';
+const CACHE_NAME = 'hediye-defteri-v14';
 // Canlida (GitHub) sadece index.html var, yerelde hediye-defteri.html - ikisi de denenir, olmayan
 // dosya kurulumu bozmasin diye her biri ayri ayri ve hatasi yutularak cache'lenir.
 const APP_SHELL = ['./', './index.html', './hediye-defteri.html', './logo.png'];
@@ -15,7 +15,9 @@ self.addEventListener('install', function(event){
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache){
-      var reqs = APP_SHELL.map(function(u){ return cache.add(u).catch(function(){}); });
+      // cache:'reload' - tarayicinin HTTP onbellegini (GitHub Pages ~10 dk) atla, yeni surumun
+      // cache'ine eski HTML girmesin.
+      var reqs = APP_SHELL.map(function(u){ return cache.add(new Request(u, {cache:'reload'})).catch(function(){}); });
       reqs.push(cache.add(new Request(SUPABASE_JS, {mode:'cors'})).catch(function(){}));
       return Promise.all(reqs);
     })

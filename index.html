@@ -214,6 +214,11 @@ nav.bottom button.active{color:var(--gold)}
   <button class="gold small" onclick="installPwa()">Yükle</button>
   <button class="sec small" onclick="document.getElementById('installBanner').style.display='none'">Sonra</button>
 </div>
+<div id="updateBanner" class="banner" style="display:none">
+  <span style="flex:1">✨ Yeni sürüm hazır.</span>
+  <button class="gold small" onclick="window.location.reload()">Yenile</button>
+  <button class="sec small" onclick="document.getElementById('updateBanner').style.display='none'">Sonra</button>
+</div>
 <div id="loginScreen" class="overlay open" style="align-items:center;justify-content:center">
   <div class="sheet" style="text-align:center;padding:32px 24px">
     <img src="logo.png" alt="Hediye Defteri logosu" style="width:96px;height:96px;object-fit:contain;margin-bottom:12px">
@@ -441,7 +446,7 @@ nav.bottom button.active{color:var(--gold)}
 
 <script>
 /* Uygulama sürümü — sw.js'deki CACHE_NAME ('hediye-defteri-vN') ile aynı numara olmalı, ikisi birlikte artırılır. */
-var APP_VERSION = 13;
+var APP_VERSION = 14;
 
 /* ---- SUPABASE ---- */
 var SUPABASE_URL = 'https://pdxnpnlwrtswwifevlil.supabase.co';
@@ -1589,8 +1594,21 @@ checkBackupNag();
 initAuth();
 
 if('serviceWorker' in navigator){
+  /* Sayfa açılırken zaten bir SW kontrol ediyorsa, sonradan gelen controllerchange yeni bir sürümün
+     devreye girdiği anlamına gelir (sw.js skipWaiting + clients.claim yapar). İlk ziyarette
+     controller yoktur — o zaman uyarı gösterilmez. */
+  var hadSwController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    if(!hadSwController){ hadSwController = true; return; }
+    document.getElementById('updateBanner').style.display = '';
+  });
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('./sw.js').catch(function(err){ console.error('SW register failed:', err); });
+    navigator.serviceWorker.register('./sw.js').then(function(reg){
+      /* Uzun süre açık kalan PWA'da da yeni sürüm yakalansın — uygulamaya her dönüşte kontrol et. */
+      document.addEventListener('visibilitychange', function(){
+        if(document.visibilityState === 'visible') reg.update().catch(function(){});
+      });
+    }).catch(function(err){ console.error('SW register failed:', err); });
   });
 }
 var deferredInstallPrompt = null;
