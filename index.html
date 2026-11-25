@@ -446,7 +446,7 @@ nav.bottom button.active{color:var(--gold)}
 
 <script>
 /* Uygulama sürümü — sw.js'deki CACHE_NAME ('hediye-defteri-vN') ile aynı numara olmalı, ikisi birlikte artırılır. */
-var APP_VERSION = 15;
+var APP_VERSION = 16;
 
 /* ---- SUPABASE ---- */
 var SUPABASE_URL = 'https://pdxnpnlwrtswwifevlil.supabase.co';
@@ -668,12 +668,26 @@ function mergeRecordRow(row){
   if(!existing.updatedAt || new Date(row.updated_at) > new Date(existing.updatedAt)) db.records[idx] = mapped;
 }
 
-function signInWithGoogle(){
+async function signInWithGoogle(){
   var cleanUrl = window.location.origin + window.location.pathname + window.location.search;
-  sb.auth.signInWithOAuth({provider:'google', options:{redirectTo: cleanUrl}});
+  try {
+    var result = await sb.auth.signInWithOAuth({provider:'google', options:{redirectTo: cleanUrl}});
+    if(result.error) throw result.error;
+  } catch(err) {
+    showAlert('Google ile giriş başlatılamadı. Bağlantınızı kontrol edip tekrar deneyin.');
+  }
 }
 function signOut(){
-  function doSignOut(){ sb.auth.signOut().then(function(){ window.location.reload(); }); }
+  async function doSignOut(){
+    try {
+      var result = await sb.auth.signOut();
+      if(result.error) throw result.error;
+    } catch(err) {
+      showAlert('Çıkış yapılamadı. Bağlantınızı kontrol edip tekrar deneyin.');
+      return;
+    }
+    window.location.reload();
+  }
   processSyncQueue().then(function(){
     var pending = loadQueue().length;
     if(!pending){ doSignOut(); return; }
