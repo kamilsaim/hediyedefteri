@@ -446,7 +446,7 @@ nav.bottom button.active{color:var(--gold)}
 
 <script>
 /* Uygulama sürümü — sw.js'deki CACHE_NAME ('hediye-defteri-vN') ile aynı numara olmalı, ikisi birlikte artırılır. */
-var APP_VERSION = 16;
+var APP_VERSION = 17;
 
 /* ---- SUPABASE ---- */
 var SUPABASE_URL = 'https://pdxnpnlwrtswwifevlil.supabase.co';
@@ -1516,6 +1516,13 @@ function exportExcel(){
   });
   var ws = XLSX.utils.aoa_to_sheet(rows);
   ws['!cols'] = [{wch:25},{wch:18},{wch:18},{wch:14},{wch:20},{wch:12},{wch:25},{wch:40}];
+  var peopleRows = [['Ad Soyad','Yakınlık','Telefon','Not']];
+  db.persons.forEach(function(p){
+    peopleRows.push([p.name||'',p.rel||'',p.phone||'',p.note||'']);
+  });
+  var peopleSheet = XLSX.utils.aoa_to_sheet(peopleRows);
+  peopleSheet['!cols'] = [{wch:25},{wch:18},{wch:18},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, peopleSheet, 'Kişiler');
   XLSX.utils.book_append_sheet(wb, ws, 'Kayıtlar');
   XLSX.writeFile(wb, 'hediye-defteri.xlsx');
 }
