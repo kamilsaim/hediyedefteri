@@ -446,7 +446,7 @@ nav.bottom button.active{color:var(--gold)}
 
 <script>
 /* Uygulama sürümü — sw.js'deki CACHE_NAME ('hediye-defteri-vN') ile aynı numara olmalı, ikisi birlikte artırılır. */
-var APP_VERSION = 14;
+var APP_VERSION = 15;
 
 /* ---- SUPABASE ---- */
 var SUPABASE_URL = 'https://pdxnpnlwrtswwifevlil.supabase.co';
@@ -1491,18 +1491,18 @@ function importExcel(inp){
 }
 function exportExcel(){
   var wb = XLSX.utils.book_new();
-  var pRows = db.persons.map(function(p){ return {'Ad Soyad':p.name,'Yakınlık':p.rel,'Telefon':p.phone,'Not':p.note}; });
-  var rRows = [];
+  var headers = ['Ad Soyad','Yakınlık','Yön','Tarih','Tür','Miktar','Etkinlik','Açıklama'];
+  var rows = [headers];
   db.records.slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');}).forEach(function(r){
     var p = db.persons.find(function(x){return x.id===r.personId;});
     r.items.forEach(function(it){
-      rRows.push({'Tarih':fmtDate(r.date),'Kişi':(p&&p.name)||'','Yön':r.dir==='in'?'Bize geldi':'Biz götürdük',
-        'Hediye':it.type,'Miktar':it.qty,'Açıklama':it.note,'TL Karşılığı':it.tl||'',
-        'Vesile':r.occ,'Etkinlik':r.event||'','Not':r.note});
+      rows.push([(p&&p.name)||'',(p&&p.rel)||'',r.dir==='in'?'Bize geldi':'Biz götürdük',
+        fmtDate(r.date),it.type,it.qty,r.event||'',it.note||'']);
     });
   });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pRows.length?pRows:[{'Ad Soyad':''}]), 'Kişiler');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rRows.length?rRows:[{'Tarih':''}]), 'Kayıtlar');
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:25},{wch:18},{wch:18},{wch:14},{wch:20},{wch:12},{wch:25},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Kayıtlar');
   XLSX.writeFile(wb, 'hediye-defteri.xlsx');
 }
 function exportJSON(){
